@@ -1,0 +1,70 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const connectDB = require('./config/db');
+const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const subjectRoutes = require('./routes/subjectRoutes');
+const tutorialRoutes = require('./routes/tutorialRoutes');
+
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB
+connectDB();
+
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:3000',  // Specifically allow Next.js frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// Middleware
+app.use(express.json());
+
+// Log all incoming requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
+// Increase payload limit for PDF uploads
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', subjectRoutes);
+app.use('/api/tutorials', tutorialRoutes);
+
+// Basic health check route
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// API 404 handler
+app.use('/api/*', (req, res) => {
+  console.log('404 - API Route not found:', req.method, req.url);
+  res.status(404).json({ error: 'API Route not found' });
+});
+
+// For Next.js client-side routing, we don't need these in development
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React app
+  app.use(express.static(path.join(__dirname, 'client/build')));
+
+  // The "catchall" handler: for any request that doesn't
+  // match one above, send back React's index.html file.
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + '/client/build/index.html'));
+  });
+}
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+}); 
