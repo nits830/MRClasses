@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 interface Subject {
-  _id: number;
+  _id: string;
   name: string;
+  subject: string;
+  createdAt: string;
 }
 
 interface Tutorial {
@@ -19,11 +21,15 @@ interface Tutorial {
   createdAt: string;
 }
 
-const TutorialForm: React.FC = () => {
+interface TutorialFormProps {
+  subjects: Subject[];
+  setTutorials: React.Dispatch<React.SetStateAction<Tutorial[]>>;
+}
+
+const TutorialForm: React.FC<TutorialFormProps> = ({ subjects, setTutorials }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [subjectId, setSubjectId] = useState('');
-  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,23 +45,6 @@ const TutorialForm: React.FC = () => {
       }
     }
   });
-
-  useEffect(() => {
-    const fetchSubjects = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/tutorials/subjects');
-        
-        setSubjects(response.data);
-        if (response.data.length > 0) {
-          setSubjectId(response.data[0]._id.toString());
-        }
-      } catch (error) {
-        console.error('Error fetching subjects:', error);
-      }
-    };
-
-    fetchSubjects();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

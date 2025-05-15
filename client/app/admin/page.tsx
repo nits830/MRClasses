@@ -81,9 +81,9 @@ const AdminDashboard: React.FC = () => {
 
         console.log('Making API requests with token:', token.substring(0, 10) + '...');
 
-        // Get subjects (from /api/subjects)
-        //const subjectsRes = await api.get("/api/subjects");
-        //setSubjects(subjectsRes.data);
+        // Get users
+        const usersRes = await api.get("/api/users/all");
+        setUsers(usersRes.data);
 
         // Get tutorials (from /api/tutorials)
         const tutorialsRes = await api.get("/api/tutorials");

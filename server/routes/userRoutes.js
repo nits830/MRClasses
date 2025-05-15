@@ -235,6 +235,7 @@ router.delete('/:userId', auth, adminMiddleware, async (req, res) => {
 router.get('/all', auth, adminMiddleware, async (req, res) => {
   try {
     const users = await User.find().select('-password');
+   
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

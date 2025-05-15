@@ -1,9 +1,20 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Dispatch, SetStateAction } from 'react';
 import axios from 'axios';
 
-const SubjectForm: React.FC = () => {
+interface Subject {
+  _id: string;
+  name: string;
+  subject: string;
+  createdAt: string;
+}
+
+interface SubjectFormProps {
+  setSubjects: Dispatch<SetStateAction<Subject[]>>;
+}
+
+const SubjectForm: React.FC<SubjectFormProps> = ({ setSubjects }) => {
   const [subject, setSubject] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -36,6 +47,7 @@ const SubjectForm: React.FC = () => {
 
       setSuccess('Subject added successfully!');
       setSubject('');
+      setSubjects((prevSubjects) => [...prevSubjects, response.data.subject]);
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to add subject');
     } finally {

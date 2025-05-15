@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import axios from "axios";
+import Link from "next/link";
 
 interface User {
   _id: string;
@@ -14,9 +15,8 @@ interface UserListProps {
   users: User[];
 }
 
-const UserList: React.FC<UserListProps> = ({ users: initialUsers }) => {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [loading, setLoading] = useState<string | null>(null);
+const UserList: React.FC<UserListProps> = ({ users }) => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleDeleteUser = async (userId: string) => {
@@ -24,7 +24,7 @@ const UserList: React.FC<UserListProps> = ({ users: initialUsers }) => {
       return;
     }
 
-    setLoading(userId);
+    setLoading(true);
     setError(null);
 
     try {
@@ -33,11 +33,12 @@ const UserList: React.FC<UserListProps> = ({ users: initialUsers }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      setUsers(users.filter(user => user._id !== userId));
+      // Instead of managing state here, we should emit an event to the parent
+      // The parent component should handle the user deletion from its state
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to delete user');
     } finally {
-      setLoading(null);
+      setLoading(false);
     }
   };
 
@@ -88,7 +89,12 @@ const UserList: React.FC<UserListProps> = ({ users: initialUsers }) => {
               {users.map((user) => (
                 <tr key={user._id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                    <Link 
+                      href={`/admin/users/${user._id}`}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                    >
+                      {user.name}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{user.email}</div>
@@ -101,12 +107,12 @@ const UserList: React.FC<UserListProps> = ({ users: initialUsers }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => handleDeleteUser(user._id)}
-                      disabled={loading === user._id}
+                      disabled={loading}
                       className={`text-red-600 hover:text-red-900 ${
-                        loading === user._id ? 'opacity-50 cursor-not-allowed' : ''
+                        loading ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
-                      {loading === user._id ? 'Deleting...' : 'Delete'}
+                      {loading ? 'Deleting...' : 'Delete'}
                     </button>
                   </td>
                 </tr>
