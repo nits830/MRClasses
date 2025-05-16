@@ -6,6 +6,7 @@ const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const subjectRoutes = require('./routes/subjectRoutes');
 const tutorialRoutes = require('./routes/tutorialRoutes');
+const assignmentRoutes = require('./routes/assignmentRoutes');
 
 const path = require('path');
 
@@ -39,8 +40,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api', subjectRoutes);
+app.use('/api/subjects', subjectRoutes);
 app.use('/api/tutorials', tutorialRoutes);
+app.use('/api/assignments', assignmentRoutes);
 
 // Basic health check route
 app.get('/api/health', (req, res) => {
