@@ -4,6 +4,35 @@ const Assignment = require('../models/Assignment');
 const auth = require('../middleware/auth');
 const adminMiddleware = require('../middleware/adminMiddleware');
 
+// Get assignments for the logged-in user
+router.get('/my-assignments', auth, async (req, res) => {
+  try {
+    const assignments = await Assignment.find({ userId: req.user._id })
+      .sort({ createdAt: -1 });
+    res.json(assignments);
+  } catch (error) {
+    console.error('Get my assignments error:', error);
+    res.status(500).json({ error: 'Error getting assignments' });
+  }
+});
+
+// Get all assignments for a specific user
+router.get('/user/:userId', auth, async (req, res) => {
+  try {
+    // Check if the requesting user is either an admin or the user themselves
+    if (req.user.role !== 'admin' && req.user._id.toString() !== req.params.userId) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    const assignments = await Assignment.find({ userId: req.params.userId })
+      .sort({ createdAt: -1 });
+    res.json(assignments);
+  } catch (error) {
+    console.error('Get assignments error:', error);
+    res.status(500).json({ error: 'Error getting assignments' });
+  }
+});
+
 // Create a new assignment for a user (admin only)
 router.post('/:userId', auth, adminMiddleware, async (req, res) => {
   try {
@@ -24,23 +53,6 @@ router.post('/:userId', auth, adminMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Create assignment error:', error);
     res.status(500).json({ error: 'Error creating assignment' });
-  }
-});
-
-// Get all assignments for a specific user
-router.get('/user/:userId', auth, async (req, res) => {
-  try {
-    // Check if the requesting user is either an admin or the user themselves
-    if (req.user.role !== 'admin' && req.user._id.toString() !== req.params.userId) {
-      return res.status(403).json({ error: 'Not authorized' });
-    }
-
-    const assignments = await Assignment.find({ userId: req.params.userId })
-      .sort({ createdAt: -1 });
-    res.json(assignments);
-  } catch (error) {
-    console.error('Get assignments error:', error);
-    res.status(500).json({ error: 'Error getting assignments' });
   }
 });
 

@@ -35,7 +35,7 @@ const SignIn: React.FC = () => {
       const { token, user } = response.data;
 
       // Store the token and user info
-      localStorage.setItem('authToken', token);
+      localStorage.setItem('token', token);
       localStorage.setItem('userName', user.name);
 
       // Redirect to user dashboard

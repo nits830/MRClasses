@@ -1,6 +1,7 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 interface Question {
   question: string;
@@ -26,6 +27,13 @@ interface AssignmentListProps {
 }
 
 const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignmentUpdated }) => {
+  const [gradingAssignment, setGradingAssignment] = useState<Assignment | null>(null);
+  const [scores, setScores] = useState<number[]>([]);
+  const [feedback, setFeedback] = useState<string[]>([]);
+  const [generalFeedback, setGeneralFeedback] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
   const getStatusColor = (status: Assignment['status']) => {
     switch (status) {
       case 'pending':
@@ -39,8 +47,64 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignme
     }
   };
 
+  const handleGradeClick = (assignment: Assignment) => {
+    setGradingAssignment(assignment);
+    setScores(assignment.questions.map(q => 0));
+    setFeedback(assignment.questions.map(q => q.feedback || ''));
+    setGeneralFeedback(assignment.feedback || '');
+  };
+
+  const handleScoreChange = (index: number, value: string) => {
+    const newScores = [...scores];
+    newScores[index] = parseInt(value) || 0;
+    setScores(newScores);
+  };
+
+  const handleFeedbackChange = (index: number, value: string) => {
+    const newFeedback = [...feedback];
+    newFeedback[index] = value;
+    setFeedback(newFeedback);
+  };
+
+  const handleSubmitGrade = async () => {
+    if (!gradingAssignment) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('token');
+      const totalScore = scores.reduce((sum, score) => sum + score, 0);
+      
+      const response = await axios.put(
+        `http://localhost:5000/api/assignments/${gradingAssignment._id}/grade`,
+        {
+          feedback: feedback,
+          totalScore,
+          generalFeedback
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      onAssignmentUpdated(response.data);
+      setGradingAssignment(null);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to submit grade');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
+
       {assignments.length === 0 ? (
         <p className="text-gray-500 text-center py-4">No assignments found</p>
       ) : (
@@ -72,12 +136,107 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignme
               )}
             </div>
 
-            {assignment.feedback && (
-              <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">Feedback:</span>{' '}
-                  {assignment.feedback}
-                </p>
+            {assignment.status === 'submitted' && !gradingAssignment && (
+              <button
+                onClick={() => handleGradeClick(assignment)}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Grade Assignment
+              </button>
+            )}
+
+            {gradingAssignment?._id === assignment._id && (
+              <div className="mt-4 space-y-4">
+                {assignment.questions.map((q, idx) => (
+                  <div key={idx} className="p-4 border rounded-lg">
+                    <p className="font-medium mb-2">Q{idx + 1}: {q.question}</p>
+                    <div className="mb-2">
+                      <p className="text-sm text-gray-600">Student's Answer:</p>
+                      <p className="mt-1 p-2 bg-gray-50 rounded">{q.answer || 'No answer submitted'}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Score (max: {q.maxScore})
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max={q.maxScore}
+                          value={scores[idx]}
+                          onChange={(e) => handleScoreChange(idx, e.target.value)}
+                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Feedback
+                        </label>
+                        <textarea
+                          value={feedback[idx]}
+                          onChange={(e) => handleFeedbackChange(idx, e.target.value)}
+                          rows={2}
+                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    General Feedback
+                  </label>
+                  <textarea
+                    value={generalFeedback}
+                    onChange={(e) => setGeneralFeedback(e.target.value)}
+                    rows={3}
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-4">
+                  <button
+                    onClick={() => setGradingAssignment(null)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmitGrade}
+                    disabled={submitting}
+                    className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 ${
+                      submitting ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Grade'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {assignment.status === 'graded' && (
+              <div className="mt-4 space-y-3">
+                {assignment.questions.map((q, idx) => (
+                  <div key={idx} className="p-3 bg-gray-50 rounded-lg">
+                    <p className="font-medium">Q{idx + 1}: {q.question}</p>
+                    <p className="mt-1 text-sm text-gray-600">Answer: {q.answer || 'No answer submitted'}</p>
+                    {q.feedback && (
+                      <p className="mt-1 text-sm text-green-700">Feedback: {q.feedback}</p>
+                    )}
+                  </div>
+                ))}
+                {assignment.feedback && (
+                  <div className="mt-2 p-3 bg-green-50 rounded-lg">
+                    <p className="text-sm text-green-800">
+                      <span className="font-medium">General Feedback:</span>{' '}
+                      {assignment.feedback}
+                    </p>
+                  </div>
+                )}
+                <div className="mt-2 text-blue-700 font-medium">
+                  Total Score: {assignment.score}
+                </div>
               </div>
             )}
           </div>
