@@ -6,9 +6,10 @@ import axios from 'axios';
 import UserAssignmentList from '../components/UserAssignmentList';
 import TestimonialForm from '../components/TestimonialForm';
 import FeedbackForm from '../components/FeedbackForm';
+import FileUpload from '../components/FileUpload';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { FaBook, FaUserCircle, FaSignOutAlt, FaGraduationCap, FaChalkboardTeacher, FaClipboardList } from 'react-icons/fa';
+import { FaBook, FaUserCircle, FaSignOutAlt, FaGraduationCap, FaChalkboardTeacher, FaClipboardList, FaFileUpload, FaFileAlt, FaTrophy, FaUser } from 'react-icons/fa';
 
 interface User {
   _id: string;
@@ -33,6 +34,11 @@ interface Assignment {
   score?: number;
   feedback?: string;
   questions: Question[];
+  files?: Array<{
+    _id: string;
+    originalName: string;
+    isResponse: boolean;
+  }>;
 }
 
 export default function UserDashboard() {
@@ -93,6 +99,12 @@ export default function UserDashboard() {
     );
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userName');
+    router.push('/signin');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-purple-50 flex items-center justify-center">
@@ -113,7 +125,7 @@ export default function UserDashboard() {
           <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Error Loading Dashboard</h2>
           <p className="text-gray-600 text-center mb-6">{error}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={handleLogout}
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
@@ -127,6 +139,7 @@ export default function UserDashboard() {
     { id: 'overview', label: 'Overview', icon: <FaUserCircle className="w-5 h-5" /> },
     { id: 'assignments', label: 'Assignments', icon: <FaClipboardList className="w-5 h-5" /> },
     { id: 'tutorials', label: 'Tutorials', icon: <FaBook className="w-5 h-5" /> },
+    { id: 'files', label: 'My Files', icon: <FaFileUpload className="w-5 h-5" /> },
     { id: 'testimonial', label: 'Share Experience', icon: <FaGraduationCap className="w-5 h-5" /> },
     { id: 'feedback', label: 'Submit Feedback', icon: <FaChalkboardTeacher className="w-5 h-5" /> },
   ];
@@ -135,91 +148,116 @@ export default function UserDashboard() {
     switch (activeSection) {
       case 'overview':
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-lg p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Assignments</h3>
-                <div className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-2">Pending Assignments</h3>
+                <p className="text-3xl font-bold text-blue-600">
+                  {assignments.filter(a => a.status === 'pending').length}
+                </p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-2">Completed</h3>
+                <p className="text-3xl font-bold text-green-600">
+                  {assignments.filter(a => a.status === 'submitted').length}
+                </p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-2">Total Assignments</h3>
+                <p className="text-3xl font-bold text-purple-600">
                   {assignments.length}
-                </div>
+                </p>
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Completed</span>
-                  <span className="font-medium text-gray-900">
-                    {assignments.filter(a => a.status === 'completed').length}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Pending</span>
-                  <span className="font-medium text-gray-900">
-                    {assignments.filter(a => a.status === 'pending').length}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-xl shadow-lg p-6"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <Link
-                  href="/tutorials"
-                  className="block text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  View Latest Tutorials
-                </Link>
-                <Link
-                  href="/profile"
-                  className="block text-blue-600 hover:text-blue-800 transition-colors"
-                >
-                  Update Profile
-                </Link>
+            <div className="bg-white rounded-lg shadow">
+              <div className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Recent Assignments</h2>
+                <div className="space-y-4">
+                  {assignments.slice(0, 5).map((assignment) => (
+                    <div
+                      key={assignment._id}
+                      className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => router.push(`/dashboard/assignments/${assignment._id}`)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-gray-900">{assignment.title}</h3>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-sm ${
+                          assignment.status === 'submitted' ? 'bg-green-100 text-green-800' :
+                          assignment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
+                        </span>
+                      </div>
+                      {assignment.files && assignment.files.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-600">
+                            {assignment.files.length} file{assignment.files.length !== 1 ? 's' : ''} attached
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-xl shadow-lg p-6"
-            >
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-              <div className="space-y-3 text-sm text-gray-600">
-                {assignments.slice(0, 3).map(assignment => (
-                  <div key={assignment._id} className="flex justify-between items-center">
-                    <span className="truncate">{assignment.title}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      assignment.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {assignment.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            </div>
           </div>
         );
       case 'assignments':
+        return (
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold mb-4">All Assignments</h2>
+              <div className="space-y-4">
+                {assignments.map((assignment) => (
+                  <div
+                    key={assignment._id}
+                    className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => router.push(`/dashboard/assignments/${assignment._id}`)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium text-gray-900">{assignment.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-sm ${
+                        assignment.status === 'submitted' ? 'bg-green-100 text-green-800' :
+                        assignment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
+                      </span>
+                    </div>
+                    {assignment.files && assignment.files.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-600">
+                          {assignment.files.length} file{assignment.files.length !== 1 ? 's' : ''} attached
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'files':
         return (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-xl shadow-lg p-6"
           >
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">My Assignments</h2>
-            <UserAssignmentList 
-              assignments={assignments} 
-              onAssignmentUpdated={handleAssignmentUpdated}
-            />
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">My Files</h2>
+            <FileUpload userId={user?._id || ''} />
           </motion.div>
         );
       case 'testimonial':
@@ -263,11 +301,7 @@ export default function UserDashboard() {
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user?.name}!</span>
               <button
-                onClick={() => {
-                  localStorage.removeItem('token');
-                  localStorage.removeItem('userName');
-                  window.location.href = '/signin';
-                }}
+                onClick={handleLogout}
                 className="flex items-center text-red-600 hover:text-red-800 transition-colors"
               >
                 <FaSignOutAlt className="w-5 h-5 mr-2" />

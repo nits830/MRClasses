@@ -3,16 +3,30 @@ const router = express.Router();
 const Assignment = require('../models/Assignment');
 const auth = require('../middleware/auth');
 const adminMiddleware = require('../middleware/adminMiddleware');
+const File = require('../models/File');
 
-// Get assignments for the logged-in user
+// Get user's assignments
 router.get('/my-assignments', auth, async (req, res) => {
   try {
     const assignments = await Assignment.find({ userId: req.user._id })
-      .sort({ createdAt: -1 });
-    res.json(assignments);
+      .sort({ dueDate: 1 });
+
+    // Fetch files for each assignment
+    const assignmentsWithFiles = await Promise.all(assignments.map(async (assignment) => {
+      const files = await File.find({ assignmentId: assignment._id })
+        .select('_id originalName isResponse')
+        .sort({ uploadedAt: -1 });
+      
+      return {
+        ...assignment.toObject(),
+        files
+      };
+    }));
+
+    res.json(assignmentsWithFiles);
   } catch (error) {
-    console.error('Get my assignments error:', error);
-    res.status(500).json({ error: 'Error getting assignments' });
+    console.error('Get assignments error:', error);
+    res.status(500).json({ error: 'Error fetching assignments' });
   }
 });
 
@@ -56,23 +70,31 @@ router.post('/:userId', auth, adminMiddleware, async (req, res) => {
   }
 });
 
-// Get a specific assignment
-router.get('/:assignmentId', auth, async (req, res) => {
+// Get single assignment
+router.get('/:id', auth, async (req, res) => {
   try {
-    const assignment = await Assignment.findById(req.params.assignmentId);
+    const assignment = await Assignment.findById(req.params.id);
     if (!assignment) {
       return res.status(404).json({ error: 'Assignment not found' });
     }
 
-    // Check if the requesting user is either an admin or the assignment owner
-    if (req.user.role !== 'admin' && req.user._id.toString() !== assignment.userId.toString()) {
-      return res.status(403).json({ error: 'Not authorized' });
+    // Check if user has permission to view this assignment
+    if (assignment.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Not authorized to view this assignment' });
     }
 
-    res.json(assignment);
+    // Fetch files for the assignment
+    const files = await File.find({ assignmentId: assignment._id })
+      .populate('uploadedBy', 'name email')
+      .sort({ uploadedAt: -1 });
+
+    res.json({
+      ...assignment.toObject(),
+      files
+    });
   } catch (error) {
     console.error('Get assignment error:', error);
-    res.status(500).json({ error: 'Error getting assignment' });
+    res.status(500).json({ error: 'Error fetching assignment' });
   }
 });
 

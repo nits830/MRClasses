@@ -9,6 +9,7 @@ const tutorialRoutes = require('./routes/tutorialRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const testimonialRoutes = require('./routes/testimonialRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const fileRoutes = require('./routes/fileRoutes');
 
 const path = require('path');
 
@@ -47,6 +48,10 @@ app.use('/api/tutorials', tutorialRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/files', fileRoutes);
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Basic health check route
 app.get('/api/health', (req, res) => {

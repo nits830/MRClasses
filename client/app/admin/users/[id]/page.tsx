@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import axios from 'axios';
 import AssignmentForm from '../../components/AssignmentForm';
 import AssignmentList from '../../components/AssignmentList';
+import AssignmentFileUpload from '@/app/components/AssignmentFileUpload';
 
 interface User {
   _id: string;
@@ -157,6 +158,29 @@ export default function UserDetailsPage() {
             assignments={assignments}
             onAssignmentUpdated={handleAssignmentUpdated}
           />
+        )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4">Assignment Files</h2>
+        {assignments.length > 0 ? (
+          <div className="space-y-6">
+            {assignments.map((assignment) => (
+              <div key={assignment._id} className="border rounded-lg p-4">
+                <h3 className="text-lg font-medium mb-4">{assignment.title}</h3>
+                <AssignmentFileUpload
+                  assignmentId={assignment._id}
+                  userId={userId}
+                  isAdmin={true}
+                  onFileUploaded={() => {
+                    // Refresh assignments or show success message
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No assignments created yet</p>
         )}
       </div>
     </div>
