@@ -68,7 +68,7 @@ const Hero: React.FC = () => {
               whileTap={{ scale: 0.95 }}
             >
               <Link 
-                href="/about" 
+                href="/learn-more" 
                 className="px-8 py-4 bg-white text-gray-800 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl border-2 border-gray-200 transition-all duration-300"
               >
                 Learn More
