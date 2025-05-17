@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FaGraduationCap, FaLaptop, FaUsers, FaBook } from 'react-icons/fa';
 
@@ -50,14 +51,14 @@ const SecondHero: React.FC = () => {
   };
 
   return (
-    <div className="relative py-24 bg-gradient-to-b from-white via-blue-50 to-white overflow-hidden">
-      {/* Background Elements */}
+    <div className="relative py-24 overflow-hidden bg-gradient-to-b from-white via-blue-50 to-white">
+      {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 left-0 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-70"
+        <motion.div 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-30"
           animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.7, 0.5, 0.7],
+            opacity: [0.3, 0.2, 0.3],
           }}
           transition={{
             duration: 8,
@@ -65,28 +66,15 @@ const SecondHero: React.FC = () => {
             ease: "easeInOut"
           }}
         />
-        <motion.div
-          className="absolute top-1/3 right-0 w-72 h-72 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70"
+        <motion.div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-100 rounded-full blur-3xl opacity-30"
           animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.7, 0.5, 0.7],
+            opacity: [0.3, 0.2, 0.3],
           }}
           transition={{
             duration: 8,
             delay: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div
-          className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-72 h-72 bg-pink-100 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.7, 0.5, 0.7],
-          }}
-          transition={{
-            duration: 8,
-            delay: 4,
             repeat: Infinity,
             ease: "easeInOut"
           }}
@@ -148,13 +136,17 @@ const SecondHero: React.FC = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <motion.button 
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+          <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Start Your Journey Today
-          </motion.button>
+            <Link 
+              href="/signup"
+              className="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Start Your Journey Today
+            </Link>
+          </motion.div>
         </motion.div>
       </div>
     </div>
