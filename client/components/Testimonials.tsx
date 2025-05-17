@@ -1,31 +1,39 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaQuoteLeft, FaStar } from 'react-icons/fa';
+import { FaQuoteLeft } from 'react-icons/fa';
+import axios from 'axios';
 
-const testimonials = [
-  {
-    name: "Sarah Chen",
-    role: "Physics Student",
-    feedback: "The interactive learning approach at MR Classes transformed my understanding of complex physics concepts. The personalized attention is incredible!",
-    rating: 5
-  },
-  {
-    name: "Michael Rodriguez",
-    role: "Mathematics Student",
-    feedback: "Thanks to MR Classes, mathematics has become my favorite subject. The instructors make learning engaging and fun!",
-    rating: 5
-  },
-  {
-    name: "Emily Thompson",
-    role: "Advanced Student",
-    feedback: "The quality of education and support at MR Classes is unmatched. I've seen remarkable improvement in my academic performance.",
-    rating: 5
-  }
-];
+interface Testimonial {
+  _id: string;
+  user: {
+    name: string;
+  };
+  content: string;
+  createdAt: string;
+}
 
 const Testimonials: React.FC = () => {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await axios.get('/api/testimonials/random?count=3');
+        setTestimonials(response.data);
+      } catch (err) {
+        setError('Failed to fetch testimonials');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestimonials();
+  }, []);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -46,6 +54,18 @@ const Testimonials: React.FC = () => {
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="py-24 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return null; // Hide section if there's an error
+  }
 
   return (
     <div className="relative py-24 bg-gradient-to-b from-white to-blue-50 overflow-hidden">
@@ -113,9 +133,9 @@ const Testimonials: React.FC = () => {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
         >
-          {testimonials.map((testimonial, index) => (
+          {testimonials.map((testimonial) => (
             <motion.div
-              key={index}
+              key={testimonial._id}
               className="relative group bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
               variants={itemVariants}
             >
@@ -130,29 +150,15 @@ const Testimonials: React.FC = () => {
               </motion.div>
 
               <div className="relative">
-                {/* Rating */}
-                <div className="flex justify-center mb-6">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.1 }}
-                    >
-                      <FaStar className="text-yellow-400 w-5 h-5" />
-                    </motion.div>
-                  ))}
-                </div>
-
                 {/* Testimonial Text */}
                 <p className="text-gray-600 text-center mb-6 italic">
-                  "{testimonial.feedback}"
+                  "{testimonial.content}"
                 </p>
 
                 {/* Student Info */}
                 <div className="text-center">
-                  <h4 className="font-semibold text-gray-800 mb-1">{testimonial.name}</h4>
-                  <p className="text-blue-600">{testimonial.role}</p>
+                  <h4 className="font-semibold text-gray-800 mb-1">{testimonial.user.name}</h4>
+                  <p className="text-blue-600">{new Date(testimonial.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
             </motion.div>

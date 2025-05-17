@@ -7,6 +7,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const subjectRoutes = require('./routes/subjectRoutes');
 const tutorialRoutes = require('./routes/tutorialRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
+const testimonialRoutes = require('./routes/testimonialRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 
 const path = require('path');
 
@@ -19,7 +21,7 @@ connectDB();
 // CORS configuration
 app.use(cors({
   origin: 'http://localhost:3000',  // Specifically allow Next.js frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
@@ -43,6 +45,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/tutorials', tutorialRoutes);
 app.use('/api/assignments', assignmentRoutes);
+app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Basic health check route
 app.get('/api/health', (req, res) => {

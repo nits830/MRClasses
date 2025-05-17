@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import UserAssignmentList from '../components/UserAssignmentList';
+import TestimonialForm from '../components/TestimonialForm';
+import FeedbackForm from '../components/FeedbackForm';
 
 interface User {
   _id: string;
@@ -110,39 +112,63 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white shadow rounded-lg p-6 mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Welcome, {user?.name}!
-            </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h2 className="text-lg font-semibold text-blue-900 mb-2">Quick Actions</h2>
-                <div className="space-y-2">
-                  <a
-                    href="/tutorials"
-                    className="block text-blue-700 hover:text-blue-900"
-                  >
-                    View Tutorials
-                  </a>
-                  <a
-                    href="/profile"
-                    className="block text-blue-700 hover:text-blue-900"
-                  >
-                    Update Profile
-                  </a>
-                </div>
+          <div className="bg-white shadow rounded-lg p-6 mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">
+                Welcome, {user?.name}!
+              </h1>
+            </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('userName');
+                window.location.href = '/signin';
+              }}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+            >
+              Logout
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold text-blue-900 mb-2">Quick Actions</h2>
+              <div className="space-y-2">
+                <a
+                  href="/tutorials"
+                  className="block text-blue-700 hover:text-blue-900"
+                >
+                  View Tutorials
+                </a>
+                <a
+                  href="/profile"
+                  className="block text-blue-700 hover:text-blue-900"
+                >
+                  Update Profile
+                </a>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Assignments Section */}
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Assignments</h2>
-            <UserAssignmentList 
-              assignments={assignments} 
-              onAssignmentUpdated={handleAssignmentUpdated}
-            />
-          </div>
+        {/* Assignments Section */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">My Assignments</h2>
+          <UserAssignmentList 
+            assignments={assignments} 
+            onAssignmentUpdated={handleAssignmentUpdated}
+          />
+        </div>
+
+        {/* Testimonial Section */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Share Your Experience</h2>
+          <TestimonialForm />
+        </div>
+
+        {/* Feedback Section */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Submit Feedback</h2>
+          <FeedbackForm />
         </div>
       </div>
     </div>

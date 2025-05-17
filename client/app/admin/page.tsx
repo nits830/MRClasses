@@ -9,6 +9,8 @@ import UserList from "./components/UserList";
 import SubjectForm from "./components/SubjectForm";
 import TutorialForm from "./components/TutorialForm";
 import Tutorials from "./components/Tutorials";
+import TestimonialManagement from "./components/TestimonialManagement";
+import FeedbackManagement from "./components/FeedbackManagement";
 
 // Interfaces
 interface User {
@@ -42,11 +44,31 @@ interface DashboardCard {
   onClick: () => void;
 }
 
+interface Testimonial {
+  _id: string;
+  userId: string;
+  content: string;
+  rating: number;
+  status: string;
+  createdAt: string;
+}
+
+interface Feedback {
+  _id: string;
+  userId: string;
+  subject: string;
+  message: string;
+  status: string;
+  createdAt: string;
+}
+
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [users, setUsers] = useState<User[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [adminName, setAdminName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -88,6 +110,14 @@ const AdminDashboard: React.FC = () => {
         // Get tutorials (from /api/tutorials)
         const tutorialsRes = await api.get("/api/tutorials");
         setTutorials(tutorialsRes.data);  
+
+        // Get testimonials
+        const testimonialsRes = await api.get("/api/testimonials/all");
+        setTestimonials(testimonialsRes.data);
+
+        // Get feedback
+        const feedbackRes = await api.get("/api/feedback/all");
+        setFeedback(feedbackRes.data);
 
         console.log('API responses received successfully');
         setAdminName(storedAdminName);
@@ -148,6 +178,28 @@ const AdminDashboard: React.FC = () => {
       ),
       bgColor: "bg-purple-500",
       onClick: () => setActiveTab("viewTutorials")
+    },
+    {
+      title: "Total Testimonials",
+      value: testimonials?.length || 0,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      ),
+      bgColor: "bg-indigo-500",
+      onClick: () => setActiveTab("testimonials")
+    },
+    {
+      title: "Total Feedback",
+      value: feedback?.length || 0,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+        </svg>
+      ),
+      bgColor: "bg-pink-500",
+      onClick: () => setActiveTab("feedback")
     }
   ];
 
@@ -262,6 +314,28 @@ const AdminDashboard: React.FC = () => {
                 </svg>
                 View Tutorials
               </button>
+              <button
+                onClick={() => setActiveTab("testimonials")}
+                className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                  activeTab === "testimonials" ? "bg-blue-100 text-blue-900" : "hover:bg-gray-100"
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                Testimonials
+              </button>
+              <button
+                onClick={() => setActiveTab("feedback")}
+                className={`w-full flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                  activeTab === "feedback" ? "bg-blue-100 text-blue-900" : "hover:bg-gray-100"
+                }`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+                Feedback
+              </button>
             </div>
           </div>
         </div>
@@ -273,6 +347,8 @@ const AdminDashboard: React.FC = () => {
           {activeTab === "subjects" && <SubjectForm setSubjects={setSubjects} />}
           {activeTab === "tutorials" && <TutorialForm subjects={subjects} setTutorials={setTutorials} />}
           {activeTab === "viewTutorials" && <Tutorials />}
+          {activeTab === "testimonials" && <TestimonialManagement />}
+          {activeTab === "feedback" && <FeedbackManagement />}
         </div>
       </div>
     </div>

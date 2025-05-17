@@ -59,10 +59,10 @@ const UserAssignmentList: React.FC<UserAssignmentListProps> = ({ assignments, on
     try {
       const token = localStorage.getItem('token');
       const userAnswers = answers[assignment._id] || assignment.questions.map(() => '');
-      const response = await axios.post(
+      const response = await axios.put(
         `http://localhost:5000/api/assignments/${assignment._id}/submit`,
         {
-          answers: userAnswers.map((answer) => ({ answer })),
+          answers: userAnswers
         },
         {
           headers: { Authorization: `Bearer ${token}` },
