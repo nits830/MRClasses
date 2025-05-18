@@ -75,27 +75,6 @@ const Hero: React.FC = () => {
               </Link>
             </motion.div>
           </div>
-          
-          {/* Stats */}
-          <motion.div 
-            className="mt-12 grid grid-cols-3 gap-8 max-w-2xl mx-auto lg:mx-0"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600">1000+</div>
-              <div className="text-gray-600 mt-2">Active Students</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-purple-600">50+</div>
-              <div className="text-gray-600 mt-2">Expert Teachers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600">95%</div>
-              <div className="text-gray-600 mt-2">Success Rate</div>
-            </div>
-          </motion.div>
         </motion.div>
 
         {/* Right content - Image */}
