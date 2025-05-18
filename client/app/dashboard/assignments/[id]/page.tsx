@@ -28,6 +28,7 @@ const AssignmentDetail = () => {
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchAssignment = async () => {
     try {
@@ -70,6 +71,38 @@ const AssignmentDetail = () => {
       await fetchAssignment();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update assignment status');
+    }
+  };
+
+  const handleSubmitAssignment = async () => {
+    if (!assignment) return;
+    
+    setSubmitting(true);
+    setError(null);
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      await axios.put(
+        `http://localhost:5000/api/assignments/${id}/status`,
+        { status: 'submitted' },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      await fetchAssignment();
+    } catch (err: any) {
+      console.error('Error submitting assignment:', err);
+      setError(err.response?.data?.message || 'Failed to submit assignment');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -173,11 +206,24 @@ const AssignmentDetail = () => {
         </div>
 
         <div className="border-t border-gray-200 p-6">
-          <h2 className="text-xl font-semibold mb-4">Assignment Files</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Assignment Files</h2>
+            {assignment?.status === 'pending' && (
+              <button
+                onClick={handleSubmitAssignment}
+                disabled={submitting}
+                className={`px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 ${
+                  submitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {submitting ? 'Submitting...' : 'Submit Assignment'}
+              </button>
+            )}
+          </div>
           <AssignmentFileUpload
-            key={assignment._id}
-            assignmentId={assignment._id}
-            userId={assignment.assignedTo}
+            key={assignment?._id}
+            assignmentId={assignment?._id || ''}
+            userId={assignment?.assignedTo || ''}
             isAdmin={false}
             onFileUploaded={fetchAssignment}
             onAssignmentStatusChange={handleAssignmentStatusChange}

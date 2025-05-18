@@ -2,9 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { FaUpload, FaDownload, FaTrash } from 'react-icons/fa';
+import { FaUpload, FaDownload, FaTrash, FaPaperPlane } from 'react-icons/fa';
 
-interface File {
+interface UploadedFile {
   _id: string;
   filename: string;
   originalName: string;
@@ -37,11 +37,13 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
   onFileUploaded,
   onAssignmentStatusChange 
 }) => {
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<UploadedFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [description, setDescription] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<globalThis.File | null>(null);
+  const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
   const fetchFiles = async () => {
     try {
@@ -80,7 +82,7 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
       console.log('Files data:', response.data);
 
       // Sort files to show responses first, then assignment files
-      const sortedFiles = response.data.sort((a: File, b: File) => {
+      const sortedFiles = response.data.sort((a: UploadedFile, b: UploadedFile) => {
         if (a.isResponse === b.isResponse) {
           return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
         }
@@ -99,14 +101,26 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files?.length) return;
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      setSelectedFile(file);
+      setIsReadyToSubmit(false); // Reset submission state when new file is selected
+    }
+  };
 
-    const file = event.target.files[0];
+  const handleUploadOrSubmit = async () => {
+    if (!selectedFile) {
+      setError('Please select a file first');
+      return;
+    }
+
+    const isResponse = !isAdmin; // All non-admin uploads are responses
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', selectedFile as Blob);
     formData.append('assignmentId', assignmentId);
-    formData.append('isResponse', (!isAdmin).toString());
+    formData.append('isResponse', isResponse.toString());
     formData.append('description', description);
 
     setLoading(true);
@@ -118,6 +132,7 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
         throw new Error('No authentication token found');
       }
 
+      // Upload the file
       console.log('Uploading file for assignment:', assignmentId);
       const response = await axios.post(
         'http://localhost:5000/api/files/upload',
@@ -131,11 +146,8 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
       );
       console.log('Upload response:', response.data);
       
-      await fetchFiles();
-      setDescription('');
-      
-      // If this is a response file, update assignment status
-      if (!isAdmin) {
+      // If this is a response submission, update the assignment status
+      if (isResponse) {
         try {
           await axios.put(
             `http://localhost:5000/api/assignments/${assignmentId}/status`,
@@ -152,8 +164,14 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
           }
         } catch (err) {
           console.error('Error updating assignment status:', err);
+          setError('File uploaded but failed to update assignment status');
         }
       }
+      
+      await fetchFiles();
+      setDescription('');
+      setSelectedFile(null);
+      setIsReadyToSubmit(false);
       
       if (onFileUploaded) {
         onFileUploaded();
@@ -283,23 +301,52 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
           className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           rows={3}
         />
+
+        {/* File Selection */}
         <div className="flex items-center space-x-4">
           <input
             type="file"
             ref={fileInputRef}
-            onChange={handleFileUpload}
+            onChange={handleFileSelect}
             className="hidden"
             accept=".pdf,.doc,.docx,.txt"
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={loading}
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             <FaUpload className="mr-2" />
-            {loading ? 'Uploading...' : isAdmin ? 'Upload Assignment' : 'Submit Response'}
+            Select File
           </button>
+          {selectedFile && (
+            <span className="text-sm text-gray-600">
+              Selected: {selectedFile.name}
+            </span>
+          )}
         </div>
+        
+        {/* Submit Button */}
+        {selectedFile && (
+          <div className="flex justify-center">
+            <button
+              onClick={handleUploadOrSubmit}
+              disabled={loading}
+              className={`flex items-center justify-center px-6 py-3 rounded-lg transition-colors ${
+                isAdmin
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-green-600 hover:bg-green-700 text-white'
+              } disabled:opacity-50 min-w-[200px]`}
+            >
+              {isAdmin ? <FaUpload className="mr-2" /> : <FaPaperPlane className="mr-2" />}
+              {loading 
+                ? 'Uploading...' 
+                : isAdmin
+                  ? 'Upload Assignment'
+                  : 'Submit Response'
+              }
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
