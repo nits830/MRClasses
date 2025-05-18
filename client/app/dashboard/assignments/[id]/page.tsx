@@ -12,6 +12,15 @@ interface Assignment {
   dueDate: string;
   status: string;
   assignedTo: string;
+  score?: number;
+  feedback?: string;
+  questions: {
+    question: string;
+    answer?: string;
+    feedback?: string;
+    score?: number;
+    maxScore: number;
+  }[];
 }
 
 const AssignmentDetail = () => {
@@ -64,6 +73,19 @@ const AssignmentDetail = () => {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'submitted':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'pending':
+        return 'bg-blue-100 text-blue-800';
+      case 'graded':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -92,26 +114,62 @@ const AssignmentDetail = () => {
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">{assignment.title}</h1>
-          <div className="prose max-w-none mb-6">
+          <div className="flex justify-between items-start mb-4">
+            <h1 className="text-2xl font-bold text-gray-900">{assignment.title}</h1>
+            <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(assignment.status)}`}>
+              {assignment.status}
+            </span>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-2">Description</h2>
             <p className="text-gray-600">{assignment.description}</p>
           </div>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <p className="text-sm text-gray-500">Due Date</p>
-              <p className="font-medium">{new Date(assignment.dueDate).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Status</p>
-              <p className={`font-medium ${
-                assignment.status === 'submitted' ? 'text-green-600' :
-                assignment.status === 'pending' ? 'text-yellow-600' :
-                'text-red-600'
-              }`}>
-                {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-2">Due Date</h2>
+              <p className="text-gray-600">
+                {new Date(assignment.dueDate).toLocaleString()}
               </p>
             </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-2">Questions</h2>
+              <p className="text-gray-600">{assignment.questions.length} questions</p>
+            </div>
           </div>
+
+          {assignment.status === 'graded' && (
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold">Grading Results</h2>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-blue-700">
+                    Score: {assignment.score || 0}
+                  </div>
+                  {assignment.feedback && (
+                    <div className="text-green-700 mt-1">
+                      {assignment.feedback}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-4">
+                {assignment.questions.map((q, idx) => (
+                  <div key={idx} className="p-4 bg-gray-50 rounded-lg">
+                    <p className="font-medium">Q{idx + 1}: {q.question}</p>
+                    <p className="mt-2 text-sm text-gray-600">Answer: {q.answer || 'No answer submitted'}</p>
+                    {q.feedback && (
+                      <p className="mt-2 text-sm text-green-700">Feedback: {q.feedback}</p>
+                    )}
+                    {q.score !== undefined && (
+                      <p className="mt-2 text-sm text-blue-700">Score: {q.score}/{q.maxScore}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="border-t border-gray-200 p-6">

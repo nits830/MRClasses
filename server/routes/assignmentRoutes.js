@@ -9,20 +9,24 @@ const File = require('../models/File');
 router.get('/my-assignments', auth, async (req, res) => {
   try {
     const assignments = await Assignment.find({ userId: req.user._id })
+      .select('title description dueDate status score feedback questions files')
       .sort({ dueDate: 1 });
 
     // Fetch files for each assignment
     const assignmentsWithFiles = await Promise.all(assignments.map(async (assignment) => {
       const files = await File.find({ assignmentId: assignment._id })
-        .select('_id originalName isResponse')
+        .select('_id originalName isResponse uploadedBy uploadedAt')
+        .populate('uploadedBy', 'name')
         .sort({ uploadedAt: -1 });
       
+      const assignmentObj = assignment.toObject();
       return {
-        ...assignment.toObject(),
+        ...assignmentObj,
         files
       };
     }));
 
+    console.log('Sending assignments:', JSON.stringify(assignmentsWithFiles, null, 2));
     res.json(assignmentsWithFiles);
   } catch (error) {
     console.error('Get assignments error:', error);
@@ -73,13 +77,15 @@ router.post('/:userId', auth, adminMiddleware, async (req, res) => {
 // Get single assignment
 router.get('/:id', auth, async (req, res) => {
   try {
-    const assignment = await Assignment.findById(req.params.id);
+    const assignment = await Assignment.findById(req.params.id)
+      .select('title description dueDate status score feedback questions files userId');
+      
     if (!assignment) {
       return res.status(404).json({ error: 'Assignment not found' });
     }
 
     // Check if user has permission to view this assignment
-    if (assignment.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    if (!assignment.userId || assignment.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Not authorized to view this assignment' });
     }
 
@@ -88,8 +94,11 @@ router.get('/:id', auth, async (req, res) => {
       .populate('uploadedBy', 'name email')
       .sort({ uploadedAt: -1 });
 
+    const assignmentObj = assignment.toObject();
+    console.log('Sending assignment to client:', JSON.stringify({ ...assignmentObj, files }, null, 2));
+    
     res.json({
-      ...assignment.toObject(),
+      ...assignmentObj,
       files
     });
   } catch (error) {
@@ -134,17 +143,28 @@ router.put('/:assignmentId/grade', auth, adminMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Assignment not found' });
     }
 
+    console.log('Grading request body:', req.body);
+
     // Update scores and feedback
     assignment.questions = assignment.questions.map((q, i) => ({
       ...q.toObject(),
-      feedback: req.body.feedback[i]
+      feedback: req.body.feedback[i] || '',
+      score: req.body.scores[i] || 0
     }));
     assignment.status = 'graded';
-    assignment.score = req.body.totalScore;
-    assignment.feedback = req.body.generalFeedback;
+    assignment.score = req.body.totalScore || 0;
+    assignment.feedback = req.body.generalFeedback || '';
 
-    await assignment.save();
-    res.json(assignment);
+    console.log('Assignment before save:', assignment);
+
+    const updatedAssignment = await assignment.save();
+    
+    // Fetch the updated assignment with all fields
+    const populatedAssignment = await Assignment.findById(updatedAssignment._id)
+      .select('title description dueDate status score feedback questions files userId');
+    
+    console.log('Graded assignment after save:', populatedAssignment);
+    res.json(populatedAssignment);
   } catch (error) {
     console.error('Grade assignment error:', error);
     res.status(500).json({ error: 'Error grading assignment' });

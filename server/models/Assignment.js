@@ -41,6 +41,10 @@ const assignmentSchema = new mongoose.Schema({
       type: Number,
       required: true
     },
+    score: {
+      type: Number,
+      default: 0
+    },
     feedback: {
       type: String
     }

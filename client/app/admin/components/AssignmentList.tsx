@@ -76,10 +76,18 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignme
       const token = localStorage.getItem('token');
       const totalScore = scores.reduce((sum, score) => sum + score, 0);
       
+      console.log('Submitting grades:', {
+        feedback,
+        scores,
+        totalScore,
+        generalFeedback
+      });
+
       const response = await axios.put(
         `http://localhost:5000/api/assignments/${gradingAssignment._id}/grade`,
         {
           feedback: feedback,
+          scores: scores,
           totalScore,
           generalFeedback
         },
@@ -88,9 +96,11 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignme
         }
       );
 
+      console.log('Grade submission response:', response.data);
       onAssignmentUpdated(response.data);
       setGradingAssignment(null);
     } catch (err: any) {
+      console.error('Grade submission error:', err);
       setError(err.response?.data?.error || 'Failed to submit grade');
     } finally {
       setSubmitting(false);
@@ -116,7 +126,18 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignme
                 {assignment.status}
               </span>
             </div>
-            
+            {assignment.status === 'graded' && (
+              <div className="mb-3">
+                <div className="text-blue-700 font-medium">
+                  Score: {assignment.score}
+                </div>
+                {assignment.feedback && (
+                  <div className="text-green-700 text-sm mt-1">
+                    Feedback: {assignment.feedback}
+                  </div>
+                )}
+              </div>
+            )}
             <p className="text-gray-600 mb-3">{assignment.description}</p>
             
             <div className="flex flex-wrap gap-4 text-sm text-gray-500">
@@ -128,12 +149,6 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignme
                 <span className="font-medium">Questions:</span>{' '}
                 {assignment.questions.length}
               </div>
-              {assignment.score !== undefined && (
-                <div>
-                  <span className="font-medium">Score:</span>{' '}
-                  {assignment.score}
-                </div>
-              )}
             </div>
 
             {assignment.status === 'submitted' && !gradingAssignment && (
@@ -226,17 +241,6 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignme
                     )}
                   </div>
                 ))}
-                {assignment.feedback && (
-                  <div className="mt-2 p-3 bg-green-50 rounded-lg">
-                    <p className="text-sm text-green-800">
-                      <span className="font-medium">General Feedback:</span>{' '}
-                      {assignment.feedback}
-                    </p>
-                  </div>
-                )}
-                <div className="mt-2 text-blue-700 font-medium">
-                  Total Score: {assignment.score}
-                </div>
               </div>
             )}
           </div>

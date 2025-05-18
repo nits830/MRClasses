@@ -8,6 +8,7 @@ interface Question {
   maxScore: number;
   answer?: string;
   feedback?: string;
+  score?: number;
 }
 
 interface Assignment {
@@ -19,6 +20,7 @@ interface Assignment {
   score?: number;
   feedback?: string;
   questions: Question[];
+  files?: { _id: string; originalName: string; uploadedAt: string; uploadedBy?: { name: string } }[];
 }
 
 interface UserAssignmentListProps {
@@ -90,9 +92,23 @@ const UserAssignmentList: React.FC<UserAssignmentListProps> = ({ assignments, on
           <div key={assignment._id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-semibold text-gray-900">{assignment.title}</h3>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(assignment.status)}`}>
-                {assignment.status}
-              </span>
+              <div className="flex flex-col items-end">
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(assignment.status)}`}>
+                  {assignment.status}
+                </span>
+                {assignment.status === 'graded' && (
+                  <div className="mt-2 text-right">
+                    <div className="text-blue-700 font-medium">
+                      Score: {assignment.score || 0}
+                    </div>
+                    {assignment.feedback && (
+                      <div className="text-green-700 text-sm mt-1">
+                        Feedback: {assignment.feedback}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <p className="text-gray-600 mb-3">{assignment.description}</p>
             <div className="flex flex-wrap gap-4 text-sm text-gray-500">
@@ -104,13 +120,52 @@ const UserAssignmentList: React.FC<UserAssignmentListProps> = ({ assignments, on
                 <span className="font-medium">Questions:</span>{' '}
                 {assignment.questions.length}
               </div>
-              {assignment.score !== undefined && (
-                <div>
-                  <span className="font-medium">Score:</span>{' '}
-                  {assignment.score}
-                </div>
-              )}
             </div>
+
+            {assignment.status === 'graded' && (
+              <div className="mt-4 space-y-3">
+                {assignment.questions.map((q, idx) => (
+                  <div key={idx} className="p-3 bg-gray-50 rounded-lg">
+                    <p className="font-medium">Q{idx + 1}: {q.question}</p>
+                    <p className="mt-1 text-sm text-gray-600">Answer: {q.answer || 'No answer submitted'}</p>
+                    {q.feedback && (
+                      <p className="mt-1 text-sm text-green-700">Feedback: {q.feedback}</p>
+                    )}
+                    {q.score !== undefined && (
+                      <p className="mt-1 text-sm text-blue-700">Score: {q.score}/{q.maxScore}</p>
+                    )}
+                  </div>
+                ))}
+                {assignment.feedback && (
+                  <div className="mt-2 p-3 bg-green-50 rounded-lg">
+                    <p className="text-sm text-green-800">
+                      <span className="font-medium">General Feedback:</span>{' '}
+                      {assignment.feedback}
+                    </p>
+                  </div>
+                )}
+                <div className="mt-2 text-blue-700 font-medium">
+                  Total Score: {assignment.score || 0}
+                </div>
+              </div>
+            )}
+
+            {assignment.files && assignment.files.length > 0 && (
+              <div className="mt-4">
+                <h4 className="font-medium mb-2">Assignment Files</h4>
+                <div className="space-y-2">
+                  {assignment.files.map((file) => (
+                    <div key={file._id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-600">{file.originalName}</span>
+                      <span className="text-xs text-gray-500">
+                        Uploaded by {file.uploadedBy?.name || 'Unknown'} on {new Date(file.uploadedAt).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {assignment.status === 'pending' && (
               <form
                 onSubmit={(e) => {
@@ -142,29 +197,10 @@ const UserAssignmentList: React.FC<UserAssignmentListProps> = ({ assignments, on
                 </button>
               </form>
             )}
-            {assignment.status !== 'pending' && (
-              <div className="mt-4 space-y-3">
-                {assignment.questions.map((q, idx) => (
-                  <div key={idx} className="mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Q{idx + 1}: {q.question}
-                    </label>
-                    <div className="mt-1 p-2 bg-gray-50 rounded">
-                      <span className="block text-gray-800">{q.answer || <em>No answer submitted</em>}</span>
-                    </div>
-                    {q.feedback && (
-                      <div className="mt-1 text-green-700 text-sm">Feedback: {q.feedback}</div>
-                    )}
-                  </div>
-                ))}
-                {assignment.feedback && (
-                  <div className="mt-2 p-2 bg-green-50 rounded">
-                    <span className="text-green-800 font-medium">General Feedback: </span>{assignment.feedback}
-                  </div>
-                )}
-                {assignment.score !== undefined && (
-                  <div className="mt-2 text-blue-700 font-medium">Total Score: {assignment.score}</div>
-                )}
+
+            {assignment.status === 'submitted' && (
+              <div className="mt-4 p-3 bg-blue-50 rounded">
+                <p className="text-blue-800">Your assignment has been submitted and is waiting for grading.</p>
               </div>
             )}
           </div>
