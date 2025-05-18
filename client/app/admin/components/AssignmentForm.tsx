@@ -20,12 +20,19 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ userId, onAssignmentCre
   const [dueDate, setDueDate] = useState('');
   const [questions, setQuestions] = useState<Question[]>([{ question: '', maxScore: 0 }]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(true);
+    setError(null);
+
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
+      
+      // First create the assignment
+      const assignmentResponse = await axios.post(
         `http://localhost:5000/api/assignments/${userId}`,
         {
           title,
@@ -38,9 +45,36 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ userId, onAssignmentCre
         }
       );
 
-      onAssignmentCreated(response.data);
+      // If there's a file selected, upload it
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('assignmentId', assignmentResponse.data._id);
+        formData.append('isResponse', 'false');
+
+        await axios.post(
+          'http://localhost:5000/api/files/upload',
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+      }
+
+      onAssignmentCreated(assignmentResponse.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to create assignment');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
     }
   };
 
@@ -98,6 +132,27 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ userId, onAssignmentCre
         />
       </div>
 
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Assignment File</label>
+        <div className="mt-1 flex items-center space-x-4">
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="hidden"
+            id="assignment-file"
+          />
+          <label
+            htmlFor="assignment-file"
+            className="cursor-pointer px-4 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100"
+          >
+            Choose File
+          </label>
+          {selectedFile && (
+            <span className="text-sm text-gray-600">{selectedFile.name}</span>
+          )}
+        </div>
+      </div>
+
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium text-gray-900">Questions</h3>
@@ -152,9 +207,12 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ userId, onAssignmentCre
         </button>
         <button
           type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          disabled={uploading}
+          className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 ${
+            uploading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
-          Create Assignment
+          {uploading ? 'Creating...' : 'Create Assignment'}
         </button>
       </div>
     </form>

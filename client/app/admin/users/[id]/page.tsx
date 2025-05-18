@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
-import AssignmentForm from '../../components/AssignmentForm';
-import AssignmentList from '../../components/AssignmentList';
+import AssignmentForm from '../../../admin/components/AssignmentForm';
+import AssignmentList from '../../../admin/components/AssignmentList';
 import AssignmentFileUpload from '@/app/components/AssignmentFileUpload';
 
 interface User {

@@ -151,4 +151,60 @@ router.put('/:assignmentId/grade', auth, adminMiddleware, async (req, res) => {
   }
 });
 
+// Update assignment status
+router.put('/:assignmentId/status', auth, async (req, res) => {
+  try {
+    const assignment = await Assignment.findById(req.params.assignmentId);
+    if (!assignment) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+
+    // Verify this is the assigned user or an admin
+    if (assignment.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    const { status } = req.body;
+    if (!['pending', 'submitted', 'graded'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    assignment.status = status;
+    await assignment.save();
+    res.json(assignment);
+  } catch (error) {
+    console.error('Update assignment status error:', error);
+    res.status(500).json({ error: 'Error updating assignment status' });
+  }
+});
+
+// Update assignment (PATCH)
+router.patch('/:assignmentId', auth, async (req, res) => {
+  try {
+    const assignment = await Assignment.findById(req.params.assignmentId);
+    if (!assignment) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+
+    // Verify this is the assigned user or an admin
+    if (assignment.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+
+    // Update only the fields that are provided
+    const updates = req.body;
+    Object.keys(updates).forEach(key => {
+      if (key !== '_id' && key !== 'userId') { // Prevent updating these fields
+        assignment[key] = updates[key];
+      }
+    });
+
+    await assignment.save();
+    res.json(assignment);
+  } catch (error) {
+    console.error('Update assignment error:', error);
+    res.status(500).json({ error: 'Error updating assignment' });
+  }
+});
+
 module.exports = router; 

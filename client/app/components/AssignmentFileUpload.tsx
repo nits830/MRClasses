@@ -135,8 +135,24 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
       setDescription('');
       
       // If this is a response file, update assignment status
-      if (!isAdmin && onAssignmentStatusChange) {
-        onAssignmentStatusChange('submitted');
+      if (!isAdmin) {
+        try {
+          await axios.put(
+            `http://localhost:5000/api/assignments/${assignmentId}/status`,
+            { status: 'submitted' },
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          if (onAssignmentStatusChange) {
+            onAssignmentStatusChange('submitted');
+          }
+        } catch (err) {
+          console.error('Error updating assignment status:', err);
+        }
       }
       
       if (onFileUploaded) {
