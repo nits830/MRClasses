@@ -1,3 +1,0 @@
-
-# Footer 
-# Personalized Footer links

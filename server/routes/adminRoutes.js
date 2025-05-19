@@ -60,38 +60,8 @@ router.delete('/users/:id', auth, adminMiddleware, async (req, res) => {
     }
 });
 
-// Tutorial Management Routes;
-router.get('/tutorials', auth, (req, res) => {
-    // Logic to retrieve all tutorials
-});
 
-router.post('/tutorials', auth, adminMiddleware, (req, res) => {
-    // Logic to create a new tutorial
-});
 
-router.put('/tutorials/:id', auth, adminMiddleware, (req, res) => {
-    // Logic to update a specific tutorial by ID
-});
 
-router.delete('/tutorials/:id', auth, adminMiddleware, (req, res) => {
-    // Logic to delete a specific tutorial by ID
-});
-
-// Category Management Routes
-router.get('/categories', auth, (req, res) => {
-    // Logic to retrieve all categories
-});
-
-router.post('/categories', auth, adminMiddleware, (req, res) => {
-    // Logic to create a new category
-});
-
-router.put('/categories/:id', auth, adminMiddleware, (req, res) => {
-    // Logic to update a specific category by ID
-});
-
-router.delete('/categories/:id', auth, adminMiddleware, (req, res) => {
-    // Logic to delete a specific category by ID
-});
 
 module.exports = router;
