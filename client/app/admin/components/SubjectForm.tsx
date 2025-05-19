@@ -35,7 +35,7 @@ const SubjectForm: React.FC<SubjectFormProps> = ({ setSubjects }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/api/tutorials/subjects',
+        'https://mrclasses-backend.onrender.com/api/tutorials/subjects',
         { subject: subject.trim() },
         {
           headers: {

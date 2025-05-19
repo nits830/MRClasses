@@ -4,8 +4,8 @@ const nextConfig = {
   output: 'standalone',
   // Configure environment variables
   env: {
-    API_URL: process.env.API_URL || 'http://localhost:5000',
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+    API_URL: process.env.API_URL || 'https://mrclasses-backend.onrender.com',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mrclasses-backend.onrender.com',
   },
 };
 

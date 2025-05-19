@@ -28,7 +28,7 @@ const AdminLogin: React.FC = () => {
 
     try {
       console.log('Attempting login with email:', email);
-      const response = await axios.post('http://localhost:5000/api/users/admin/login', {
+      const response = await axios.post('https://mrclasses-backend.onrender.com/api/users/admin/login', {
         email,
         password,
       });

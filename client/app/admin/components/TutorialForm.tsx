@@ -55,7 +55,7 @@ const TutorialForm: React.FC<TutorialFormProps> = ({ subjects, setTutorials }) =
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/api/tutorials',
+        'https://mrclasses-backend.onrender.com/api/tutorials',
         {
           title,
           description,

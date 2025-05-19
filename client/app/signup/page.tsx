@@ -33,7 +33,7 @@ const SignUp: React.FC = () => {
 
     try {
       // Send the sign-up request to the backend using axios
-      const response = await axios.post('http://localhost:5000/api/users/signup', {
+      const response = await axios.post('https://mrclasses-backend.onrender.com/api/users/signup', {
         name,
         email,
         password

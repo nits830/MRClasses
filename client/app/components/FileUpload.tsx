@@ -34,8 +34,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId, isAdmin = false, onFile
       
       const response = await axios.get(
         isAdmin 
-          ? `http://localhost:5000/api/files/user/${userId}`
-          : 'http://localhost:5000/api/files/my-files',
+          ? `https://mrclasses-backend.onrender.com/api/files/user/${userId}`
+          : 'https://mrclasses-backend.onrender.com/api/files/my-files',
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -65,7 +65,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId, isAdmin = false, onFile
       console.log('Uploading file with token:', token ? 'Present' : 'Missing');
       
       const response = await axios.post(
-        'http://localhost:5000/api/files/upload',
+        'https://mrclasses-backend.onrender.com/api/files/upload',
         formData,
         {
           headers: {
@@ -97,7 +97,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId, isAdmin = false, onFile
       console.log('Downloading file:', fileId);
       
       const response = await axios.get(
-        `http://localhost:5000/api/files/download/${fileId}`,
+        `https://mrclasses-backend.onrender.com/api/files/download/${fileId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob'
@@ -125,7 +125,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ userId, isAdmin = false, onFile
       console.log('Deleting file:', fileId);
       
       await axios.delete(
-        `http://localhost:5000/api/files/${fileId}`,
+        `https://mrclasses-backend.onrender.com/api/files/${fileId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

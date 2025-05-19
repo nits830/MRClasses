@@ -14,14 +14,14 @@ const fileRoutes = require('./routes/fileRoutes');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 // Connect to MongoDB
 connectDB();
 
 // CORS configuration
 app.use(cors({
-  origin: 'http://localhost:3000',  // Specifically allow Next.js frontend
+  origin: ['http://localhost:3000', 'https://mrclasses.vercel.app'],  // Allow both local and production frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -64,17 +64,10 @@ app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'API Route not found' });
 });
 
-// For Next.js client-side routing, we don't need these in development
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the React app
-  app.use(express.static(path.join(__dirname, 'client/build')));
-
-  // The "catchall" handler: for any request that doesn't
-  // match one above, send back React's index.html file.
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname + '/client/build/index.html'));
-  });
-}
+// Catch-all route for non-API requests
+app.get('*', (req, res) => {
+  res.status(404).json({ error: 'Not Found' });
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
