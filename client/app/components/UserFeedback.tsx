@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Alert, Chip } from '@mui/material';
-import axios from '../lib/axios';
 
 interface Feedback {
   _id: string;
@@ -22,8 +21,12 @@ const UserFeedback = () => {
 
   const fetchUserFeedback = async () => {
     try {
-      const response = await axios.get('/api/feedback/my-feedback');
-      setFeedback(response.data);
+      const response = await fetch('/api/feedback/my-feedback');
+      if (!response.ok) {
+        throw new Error('Failed to fetch feedback');
+      }
+      const data = await response.json();
+      setFeedback(data);
     } catch (err: any) {
       setError('Failed to fetch your feedback');
     }
