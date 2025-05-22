@@ -62,7 +62,7 @@ const UserAssignmentList: React.FC<UserAssignmentListProps> = ({ assignments, on
       const token = localStorage.getItem('token');
       const userAnswers = answers[assignment._id] || assignment.questions.map(() => '');
       const response = await axios.put(
-        `http://localhost:5000/api/assignments/${assignment._id}/submit`,
+        `https://mrclasses-backend.onrender.com/api/assignments/${assignment._id}/submit`,
         {
           answers: userAnswers
         },

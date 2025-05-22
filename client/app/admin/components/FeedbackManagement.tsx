@@ -45,7 +45,7 @@ const FeedbackManagement: React.FC = () => {
   const fetchFeedback = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/feedback/all', {
+      const response = await axios.get('https://mrclasses-backend.onrender.com/api/feedback/all', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFeedback(response.data);
@@ -64,7 +64,7 @@ const FeedbackManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(
-        `http://localhost:5000/api/feedback/${feedbackId}/status`,
+        `https://mrclasses-backend.onrender.com/api/feedback/${feedbackId}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -80,7 +80,7 @@ const FeedbackManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:5000/api/feedback/${selectedFeedback._id}/respond`,
+        `https://mrclasses-backend.onrender.com/api/feedback/${selectedFeedback._id}/respond`,
         { response: responseText },
         { headers: { Authorization: `Bearer ${token}` } }
       );

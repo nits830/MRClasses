@@ -29,7 +29,7 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/users/${userId}`, {
+      await axios.delete(`https://mrclasses-backend.onrender.com/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

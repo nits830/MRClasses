@@ -33,7 +33,7 @@ const Tutorials: React.FC = () => {
           return;
         }
 
-        const response = await axios.get("http://localhost:5000/api/tutorials", {
+        const response = await axios.get("https://mrclasses-backend.onrender.com/api/tutorials", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

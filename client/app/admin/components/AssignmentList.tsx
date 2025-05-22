@@ -84,7 +84,7 @@ const AssignmentList: React.FC<AssignmentListProps> = ({ assignments, onAssignme
       });
 
       const response = await axios.put(
-        `http://localhost:5000/api/assignments/${gradingAssignment._id}/grade`,
+        `https://mrclasses-backend.onrender.com/api/assignments/${gradingAssignment._id}/grade`,
         {
           feedback: feedback,
           scores: scores,

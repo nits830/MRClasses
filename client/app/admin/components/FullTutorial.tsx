@@ -38,7 +38,7 @@ const FullTutorial: React.FC = () => {
         }
 
         console.log('Fetching tutorial with ID:', id);
-        const response = await axios.get(`http://localhost:5000/api/tutorials/${id}`, {
+        const response = await axios.get(`https://mrclasses-backend.onrender.com/api/tutorials/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

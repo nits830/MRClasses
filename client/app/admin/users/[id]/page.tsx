@@ -52,13 +52,13 @@ export default function UserDetailsPage() {
         console.log('Fetching data for user ID:', userId);
         
         const [userResponse, assignmentsResponse] = await Promise.all([
-          axios.get(`http://localhost:5000/api/users/${userId}`, {
+          axios.get(`https://mrclasses-backend.onrender.com/api/users/${userId}`, {
             headers: { 
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }),
-          axios.get(`http://localhost:5000/api/assignments/user/${userId}`, {
+          axios.get(`https://mrclasses-backend.onrender.com/api/assignments/user/${userId}`, {
             headers: { 
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json'

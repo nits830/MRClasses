@@ -90,7 +90,7 @@ const AdminDashboard: React.FC = () => {
 
       // Create axios instance with default headers
       const api = axios.create({
-        baseURL: 'http://localhost:5000',
+        baseURL: 'https://mrclasses-backend.onrender.com',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'

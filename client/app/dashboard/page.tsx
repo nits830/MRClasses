@@ -59,10 +59,10 @@ export default function UserDashboard() {
         }
 
         const [userResponse, assignmentsResponse] = await Promise.all([
-          axios.get('http://localhost:5000/api/users/profile', {
+          axios.get('https://mrclasses-backend.onrender.com/api/users/profile', {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          axios.get('http://localhost:5000/api/assignments/my-assignments', {
+          axios.get('https://mrclasses-backend.onrender.com/api/assignments/my-assignments', {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);

@@ -33,7 +33,7 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ userId, onAssignmentCre
       
       // First create the assignment
       const assignmentResponse = await axios.post(
-        `http://localhost:5000/api/assignments/${userId}`,
+        `https://mrclasses-backend.onrender.com/api/assignments/${userId}`,
         {
           title,
           description,
@@ -53,7 +53,7 @@ const AssignmentForm: React.FC<AssignmentFormProps> = ({ userId, onAssignmentCre
         formData.append('isResponse', 'false');
 
         await axios.post(
-          'http://localhost:5000/api/files/upload',
+          'https://mrclasses-backend.onrender.com/api/files/upload',
           formData,
           {
             headers: {

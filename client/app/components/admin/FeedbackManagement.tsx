@@ -47,7 +47,7 @@ const FeedbackManagement = () => {
   const fetchFeedback = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/feedback/all', {
+      const response = await axios.get('https://mrclasses-backend.onrender.com/api/feedback/all', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -61,7 +61,7 @@ const FeedbackManagement = () => {
   const handleUpdateFeedback = async (id: string) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.patch(`http://localhost:5000/api/feedback/${id}`, 
+      await axios.patch(`https://mrclasses-backend.onrender.com/api/feedback/${id}`, 
         {
           status,
           adminResponse
@@ -87,7 +87,7 @@ const FeedbackManagement = () => {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/feedback/${id}`, {
+      await axios.delete(`https://mrclasses-backend.onrender.com/api/feedback/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

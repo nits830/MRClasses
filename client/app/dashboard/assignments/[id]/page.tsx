@@ -39,7 +39,7 @@ const AssignmentDetail = () => {
 
       console.log('Fetching assignment:', id);
       const response = await axios.get(
-        `http://localhost:5000/api/assignments/${id}`,
+        `https://mrclasses-backend.onrender.com/api/assignments/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -62,7 +62,7 @@ const AssignmentDetail = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(
-        `http://localhost:5000/api/assignments/${id}`,
+        `https://mrclasses-backend.onrender.com/api/assignments/${id}`,
         { status: newStatus },
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -87,7 +87,7 @@ const AssignmentDetail = () => {
       }
 
       await axios.put(
-        `http://localhost:5000/api/assignments/${id}/status`,
+        `https://mrclasses-backend.onrender.com/api/assignments/${id}/status`,
         { status: 'submitted' },
         {
           headers: {

@@ -27,7 +27,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onSuccess }) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/api/feedback', 
+      const response = await axios.post('https://mrclasses-backend.onrender.com/api/feedback', 
         formData,
         {
           headers: {

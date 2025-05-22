@@ -57,7 +57,7 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
       // First verify the assignment exists
       try {
         const assignmentResponse = await axios.get(
-          `http://localhost:5000/api/assignments/${assignmentId}`,
+          `https://mrclasses-backend.onrender.com/${assignmentId}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -74,7 +74,7 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
 
       // Then fetch the files
       const response = await axios.get(
-        `http://localhost:5000/api/files/assignment/${assignmentId}`,
+        `https://mrclasses-backend.onrender.com/api/files/assignment/${assignmentId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -135,7 +135,7 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
       // Upload the file
       console.log('Uploading file for assignment:', assignmentId);
       const response = await axios.post(
-        'http://localhost:5000/api/files/upload',
+        'https://mrclasses-backend.onrender.com/api/files/upload',
         formData,
         {
           headers: {
@@ -150,7 +150,7 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
       if (isResponse) {
         try {
           await axios.put(
-            `http://localhost:5000/api/assignments/${assignmentId}/status`,
+            `https://mrclasses-backend.onrender.com/api/assignments/${assignmentId}/status`,
             { status: 'submitted' },
             {
               headers: {
@@ -199,7 +199,7 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
       
       // Fetch the file with proper headers
       const response = await fetch(
-        `http://localhost:5000/api/files/download/${fileId}`,
+        `https://mrclasses-backend.onrender.com/api/files/download/${fileId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -256,7 +256,7 @@ const AssignmentFileUpload: React.FC<AssignmentFileUploadProps> = ({
 
       console.log('Deleting file:', fileId);
       await axios.delete(
-        `http://localhost:5000/api/files/${fileId}`,
+        `https://mrclasses-backend.onrender.com/api/files/${fileId}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

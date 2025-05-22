@@ -36,7 +36,7 @@ const TestimonialManagement: React.FC = () => {
   const fetchTestimonials = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/testimonials/all', {
+      const response = await axios.get('https://mrclasses-backend.onrender.com/api/testimonials/all', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTestimonials(response.data);
@@ -55,7 +55,7 @@ const TestimonialManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.patch(
-        `http://localhost:5000/api/testimonials/${testimonialId}/status`,
+        `https://mrclasses-backend.onrender.com/api/testimonials/${testimonialId}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -70,7 +70,7 @@ const TestimonialManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/testimonials/${testimonialId}`, {
+      await axios.delete(`https://mrclasses-backend.onrender.com/api/testimonials/${testimonialId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchTestimonials(); // Refresh the list

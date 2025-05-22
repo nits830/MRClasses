@@ -17,7 +17,7 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({ onSuccess }) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/api/testimonials', 
+      const response = await axios.post('https://mrclasses-backend.onrender.com/api/testimonials', 
         { content },
         {
           headers: {
