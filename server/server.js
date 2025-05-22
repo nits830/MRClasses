@@ -21,7 +21,7 @@ connectDB();
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://mrclasses.vercel.app'],  // Allow both local and production frontend
+  origin: ['http://localhost:3000', 'https://mrclasses.vercel.app', 'https://mrclasses-frontend.onrender.com'],  // Allow both local and production frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
